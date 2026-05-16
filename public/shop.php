@@ -17,6 +17,16 @@ if ($category !== '') {
 }
 $items = $stmt->fetchAll();
 
+$recentStmt = db()->query("
+    SELECT oi.item_name, oi.quantity, oi.total_price, o.username, o.created_at, wi.image_url, wi.category
+    FROM webshop_order_items oi
+    INNER JOIN webshop_orders o ON o.id = oi.order_id
+    LEFT JOIN webshop_items wi ON wi.id = oi.item_id
+    ORDER BY o.created_at DESC, oi.id DESC
+    LIMIT 8
+");
+$recentPurchases = $recentStmt->fetchAll();
+
 render_header('Shop');
 ?>
 <section class="section-head">
@@ -32,31 +42,62 @@ render_header('Shop');
         <a class="chip <?= $category === $cat ? 'active' : '' ?>" href="/shop.php?category=<?= urlencode((string) $cat) ?>"><?= e((string) $cat) ?></a>
     <?php endforeach; ?>
 </div>
-<section class="shop-grid">
-    <?php foreach ($items as $item): ?>
-        <article class="item-card">
-            <div class="item-image">
-                <?php if (!empty($item['image_url'])): ?>
-                    <img src="<?= e($item['image_url']) ?>" alt="<?= e($item['name']) ?>">
-                <?php else: ?>
-                    <span>✦</span>
-                <?php endif; ?>
-            </div>
-            <div class="item-content">
-                <span class="category"><?= e($item['category']) ?></span>
-                <h2><?= e($item['name']) ?></h2>
-                <p><?= e($item['description'] ?? 'A server reward delivered by command queue.') ?></p>
-                <div class="item-bottom">
-                    <strong><?= e(format_shards((int) $item['price'])) ?></strong>
-                    <form class="ajax-form" action="/api/cart-add.php" method="post">
-                        <?= csrf_field() ?>
-                        <input type="hidden" name="item_id" value="<?= (int) $item['id'] ?>">
-                        <button class="btn btn-small" type="submit">Add to Cart</button>
-                    </form>
+<div class="shop-layout">
+    <section class="shop-grid">
+        <?php foreach ($items as $item): ?>
+            <article class="item-card">
+                <div class="item-image">
+                    <?php if (!empty($item['image_url'])): ?>
+                        <img src="<?= e($item['image_url']) ?>" alt="<?= e($item['name']) ?>">
+                    <?php else: ?>
+                        <span>✦</span>
+                    <?php endif; ?>
                 </div>
-            </div>
-        </article>
-    <?php endforeach; ?>
-</section>
-<?php if ($items === []): ?><div class="alert">No enabled items found in this category.</div><?php endif; ?>
+                <div class="item-content">
+                    <span class="category"><?= e($item['category']) ?></span>
+                    <h2><?= e($item['name']) ?></h2>
+                    <p><?= e($item['description'] ?? 'A server reward delivered by command queue.') ?></p>
+                    <div class="item-bottom">
+                        <strong><?= e(format_shards((int) $item['price'])) ?></strong>
+                        <form class="ajax-form" action="/api/cart-add.php" method="post">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="item_id" value="<?= (int) $item['id'] ?>">
+                            <button class="btn btn-small" type="submit">Add to Cart</button>
+                        </form>
+                    </div>
+                </div>
+            </article>
+        <?php endforeach; ?>
+        <?php if ($items === []): ?><div class="alert">No enabled items found in this category.</div><?php endif; ?>
+    </section>
+    <aside class="recent-purchases" aria-labelledby="recent-purchases-title">
+        <div class="sidebar-title">
+            <p class="eyebrow">Live Feed</p>
+            <h2 id="recent-purchases-title">Recent Purchases</h2>
+        </div>
+        <div class="recent-list">
+            <?php foreach ($recentPurchases as $purchase): ?>
+                <article class="recent-purchase">
+                    <div class="mini-icon item-thumb">
+                        <?php if (!empty($purchase['image_url'])): ?>
+                            <img src="<?= e($purchase['image_url']) ?>" alt="<?= e($purchase['item_name']) ?>">
+                        <?php else: ?>
+                            <span>✦</span>
+                        <?php endif; ?>
+                    </div>
+                    <div>
+                        <strong><?= e($purchase['item_name']) ?></strong>
+                        <p><?= e($purchase['username']) ?> bought <?= (int) $purchase['quantity'] ?> · <?= e(format_shards((int) $purchase['total_price'])) ?></p>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+            <?php if ($recentPurchases === []): ?>
+                <div class="empty-feed">
+                    <strong>No purchases yet</strong>
+                    <p>Fresh orders will show up here.</p>
+                </div>
+            <?php endif; ?>
+        </div>
+    </aside>
+</div>
 <?php render_footer(); ?>
