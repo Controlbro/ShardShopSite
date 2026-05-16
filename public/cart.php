@@ -20,7 +20,13 @@ render_header('Cart');
         <div class="cart-list">
             <?php foreach ($details['items'] as $item): ?>
                 <article class="cart-row">
-                    <div class="mini-icon">✦</div>
+                    <div class="mini-icon item-thumb">
+                        <?php if (!empty($item['image_url'])): ?>
+                            <img src="<?= e($item['image_url']) ?>" alt="<?= e($item['name']) ?>">
+                        <?php else: ?>
+                            <span>✦</span>
+                        <?php endif; ?>
+                    </div>
                     <div>
                         <h2><?= e($item['name']) ?></h2>
                         <p><?= e($item['category']) ?> · <?= e(format_shards((int) $item['price'])) ?> each</p>
