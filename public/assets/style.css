@@ -112,6 +112,71 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(34, 211, 238
 .alert { margin: 16px 0; padding: 14px 16px; border-radius: 8px; background: rgba(34, 211, 238, .12); border: 1px solid var(--border); }
 .alert-error { background: rgba(251, 113, 133, .13); border-color: rgba(251, 113, 133, .36); }
 .alert-success { background: rgba(52, 211, 153, .13); border-color: rgba(52, 211, 153, .34); }
+.auth-help-grid { display: grid; gap: 10px; margin-top: 18px; }
+.auth-help {
+  border: 1px solid rgba(164, 177, 255, .18);
+  border-radius: 10px;
+  background: rgba(255,255,255,.045);
+  overflow: hidden;
+}
+.auth-help summary {
+  cursor: pointer;
+  padding: 12px 14px;
+  color: var(--text);
+  font-weight: 900;
+}
+.auth-help p { margin: 0; padding: 0 14px 14px; }
+.quantity-label { width: 92px; margin: 0; gap: 6px; font-size: .82rem; text-transform: uppercase; letter-spacing: .08em; }
+.quantity-input { padding: 9px 10px; text-align: center; font-weight: 900; }
+.login-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(34, 211, 238, .24), transparent 18rem),
+    radial-gradient(circle at 50% 48%, rgba(139, 92, 246, .34), transparent 26rem),
+    rgba(7, 9, 20, .96);
+  animation: intro-arrive .7s ease both;
+}
+.login-intro h2 { margin: 0; font-size: clamp(2rem, 6vw, 4.8rem); text-shadow: 0 0 28px rgba(34, 211, 238, .4); }
+.login-intro p { max-width: 520px; margin: 0; }
+.intro-gem {
+  display: grid;
+  place-items: center;
+  width: 108px;
+  height: 108px;
+  border: 1px solid rgba(34, 211, 238, .45);
+  border-radius: 26px;
+  color: var(--blue);
+  font-size: 4.4rem;
+  background: linear-gradient(135deg, rgba(139, 92, 246, .24), rgba(34, 211, 238, .18));
+  box-shadow: 0 0 34px rgba(34, 211, 238, .28), inset 0 0 28px rgba(255,255,255,.08);
+  animation: gem-pulse 1.2s ease-in-out infinite alternate;
+}
+.intro-bar {
+  width: min(360px, 82vw);
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.08);
+}
+.intro-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--purple), var(--blue), var(--green)); animation: intro-load 2.4s ease forwards; }
+.login-intro-out { animation: intro-leave .65s ease forwards; }
+@keyframes intro-arrive { from { opacity: 0; transform: scale(1.04); } to { opacity: 1; transform: scale(1); } }
+@keyframes intro-leave { to { opacity: 0; transform: scale(.97); filter: blur(10px); } }
+@keyframes gem-pulse { from { transform: rotate(-4deg) scale(.96); filter: drop-shadow(0 0 12px var(--blue)); } to { transform: rotate(4deg) scale(1.04); filter: drop-shadow(0 0 30px var(--blue)); } }
+@keyframes intro-load { from { width: 0; } to { width: 100%; } }
+@media (prefers-reduced-motion: reduce) {
+  .login-intro, .login-intro-out, .intro-gem, .intro-bar span { animation: none; }
+}
+
 .section-head { justify-content: space-between; margin-bottom: 22px; }
 .section-head h1 { font-size: clamp(2rem, 4vw, 3.5rem); }
 .filters { margin-bottom: 22px; }
@@ -141,7 +206,7 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(34, 211, 238
 .item-bottom strong, .summary-line strong { font-size: 1.2rem; color: var(--blue); }
 .cart-layout { display: grid; grid-template-columns: 1fr 330px; gap: 22px; align-items: start; }
 .cart-list { display: grid; gap: 14px; }
-.cart-row { padding: 16px; display: grid; grid-template-columns: auto 1fr auto auto auto; align-items: center; gap: 16px; }
+.cart-row { padding: 16px; display: grid; grid-template-columns: auto 1fr 92px auto auto; align-items: center; gap: 16px; }
 .mini-icon { width: 48px; height: 48px; display: grid; place-items: center; overflow: hidden; border-radius: 7px; background: rgba(34,211,238,.14); color: var(--blue); font-size: 1.5rem; }
 .summary-card { padding: 22px; position: sticky; top: 105px; display: grid; gap: 14px; }
 .orders-list { display: grid; gap: 16px; }

@@ -19,7 +19,7 @@ render_header('Cart');
     <section class="cart-layout">
         <div class="cart-list">
             <?php foreach ($details['items'] as $item): ?>
-                <article class="cart-row">
+                <article class="cart-row" data-cart-row data-item-id="<?= (int) $item['id'] ?>">
                     <div class="mini-icon item-thumb">
                         <?php if (!empty($item['image_url'])): ?>
                             <img src="<?= e($item['image_url']) ?>" alt="<?= e($item['name']) ?>">
@@ -31,8 +31,14 @@ render_header('Cart');
                         <h2><?= e($item['name']) ?></h2>
                         <p><?= e($item['category']) ?> · <?= e(format_shards((int) $item['price'])) ?> each</p>
                     </div>
-                    <strong>Qty <?= (int) $item['quantity'] ?></strong>
-                    <strong><?= e(format_shards((int) $item['line_total'])) ?></strong>
+                    <form class="cart-quantity-form" action="/api/cart-update.php" method="post" data-cart-quantity-form>
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="item_id" value="<?= (int) $item['id'] ?>">
+                        <label class="quantity-label">Qty
+                            <input class="quantity-input" type="number" name="quantity" min="0" max="99" value="<?= (int) $item['quantity'] ?>" inputmode="numeric" aria-label="Quantity for <?= e($item['name']) ?>">
+                        </label>
+                    </form>
+                    <strong data-line-total><?= e(format_shards((int) $item['line_total'])) ?></strong>
                     <form class="ajax-form" action="/api/cart-remove.php" method="post">
                         <?= csrf_field() ?>
                         <input type="hidden" name="item_id" value="<?= (int) $item['id'] ?>">
@@ -43,7 +49,7 @@ render_header('Cart');
         </div>
         <aside class="summary-card">
             <h2>Order Summary</h2>
-            <div class="summary-line"><span>Total</span><strong><?= e(format_shards((int) $details['total'])) ?></strong></div>
+            <div class="summary-line"><span>Total</span><strong data-cart-total><?= e(format_shards((int) $details['total'])) ?></strong></div>
             <form class="checkout-form" action="/api/checkout.php" method="post">
                 <?= csrf_field() ?>
                 <button class="btn full" type="submit" data-checkout-button>Checkout</button>

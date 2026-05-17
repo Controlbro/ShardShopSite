@@ -83,6 +83,19 @@ function add_to_cart(int $itemId): void
     set_cart($cart);
 }
 
+
+function set_cart_quantity(int $itemId, int $quantity): void
+{
+    $cart = cart();
+    $key = (string) $itemId;
+    if ($quantity <= 0) {
+        unset($cart[$key]);
+    } else {
+        $cart[$key] = min(99, $quantity);
+    }
+    set_cart($cart);
+}
+
 function remove_from_cart(int $itemId): void
 {
     $cart = cart();

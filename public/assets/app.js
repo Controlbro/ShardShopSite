@@ -51,6 +51,54 @@
     });
   });
 
+
+  document.querySelectorAll('[data-cart-quantity-form]').forEach((form) => {
+    const input = form.querySelector('input[name="quantity"]');
+    const row = form.closest('[data-cart-row]');
+    let lastValue = input ? input.value : '';
+    let updateTimer = null;
+
+    async function submitQuantity() {
+      if (!input || input.value === lastValue) return;
+      input.value = String(Math.max(0, Math.min(99, Number.parseInt(input.value || '0', 10) || 0)));
+      try {
+        const json = await postForm(form);
+        lastValue = String(json.quantity);
+        input.value = lastValue;
+        document.querySelectorAll('[data-cart-total]').forEach((el) => {
+          el.textContent = json.formatted_total;
+        });
+        if (row) {
+          const lineTotal = row.querySelector('[data-line-total]');
+          if (lineTotal) lineTotal.textContent = json.formatted_line_total;
+          if (json.removed) {
+            row.remove();
+            if (!document.querySelector('[data-cart-row]')) {
+              window.location.reload();
+            }
+          }
+        }
+        showToast(json.message || 'Cart updated.', true);
+      } catch (error) {
+        input.value = lastValue;
+        showToast(error.message, false);
+      }
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      submitQuantity();
+    });
+
+    if (input) {
+      input.addEventListener('change', submitQuantity);
+      input.addEventListener('input', () => {
+        clearTimeout(updateTimer);
+        updateTimer = setTimeout(submitQuantity, 650);
+      });
+    }
+  });
+
   document.querySelectorAll('form.checkout-form').forEach((form) => {
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -97,4 +145,43 @@
 
   refreshBalance();
   setInterval(refreshBalance, 3000);
+
+  function showLoginIntro() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('welcome') !== '1') return;
+
+    const username = document.querySelector('.username')?.textContent?.trim() || 'Player';
+    const overlay = document.createElement('div');
+    overlay.className = 'login-intro';
+
+    const gem = document.createElement('div');
+    gem.className = 'intro-gem';
+    gem.textContent = '✦';
+
+    const eyebrow = document.createElement('p');
+    eyebrow.className = 'eyebrow';
+    eyebrow.textContent = 'Access Granted';
+
+    const heading = document.createElement('h2');
+    heading.textContent = `Welcome, ${username}`;
+
+    const message = document.createElement('p');
+    message.textContent = 'Syncing your Shards balance and opening the reward vault...';
+
+    const bar = document.createElement('div');
+    bar.className = 'intro-bar';
+    bar.appendChild(document.createElement('span'));
+
+    overlay.append(gem, eyebrow, heading, message, bar);
+    document.body.appendChild(overlay);
+
+    params.delete('welcome');
+    const cleanUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}${window.location.hash}`;
+    window.history.replaceState({}, '', cleanUrl);
+    setTimeout(() => overlay.classList.add('login-intro-out'), 2550);
+    setTimeout(() => overlay.remove(), 3200);
+  }
+
+  showLoginIntro();
+
 })();
