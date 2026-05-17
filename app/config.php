@@ -28,3 +28,5 @@ define('BALANCE_CURRENCY_VALUE', 'Shards');
 
 // Session hardening.
 define('SESSION_NAME', 'shardshop_session');
+define('REMEMBER_COOKIE_NAME', 'shardshop_remember');
+define('REMEMBER_COOKIE_LIFETIME', 60 * 60 * 24 * 30);
