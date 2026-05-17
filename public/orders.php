@@ -10,7 +10,7 @@ $stmt = db()->prepare('SELECT * FROM webshop_orders WHERE uuid = ? ORDER BY crea
 $stmt->execute([$user['uuid']]);
 $orders = $stmt->fetchAll();
 
-$itemStmt = db()->prepare('SELECT item_name, quantity, total_price FROM webshop_order_items WHERE order_id = ? ORDER BY id');
+$itemStmt = db()->prepare('SELECT oi.item_name, oi.quantity, oi.unit_price, oi.total_price, wi.image_url, wi.category FROM webshop_order_items oi LEFT JOIN webshop_items wi ON wi.id = oi.item_id WHERE oi.order_id = ? ORDER BY oi.id');
 render_header('Orders');
 ?>
 <section class="section-head"><div><p class="eyebrow">History</p><h1>Your Orders</h1></div></section>
@@ -20,11 +20,25 @@ render_header('Orders');
         <article class="glass-card order-card">
             <div class="order-top"><h2>Order #<?= (int) $order['id'] ?></h2><span class="status"><?= e($order['status']) ?></span></div>
             <p><?= e((string) $order['created_at']) ?> · <?= e(format_shards((int) $order['total_price'])) ?></p>
-            <ul>
+            <div class="order-item-list">
                 <?php foreach ($items as $item): ?>
-                    <li><?= e($item['item_name']) ?> × <?= (int) $item['quantity'] ?> — <?= e(format_shards((int) $item['total_price'])) ?></li>
+                    <div class="order-item-row">
+                        <div class="mini-icon item-thumb">
+                            <?php if (!empty($item['image_url'])): ?>
+                                <img src="<?= e($item['image_url']) ?>" alt="<?= e($item['item_name']) ?>">
+                            <?php else: ?>
+                                <span>✦</span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="order-item-main">
+                            <strong><?= e($item['item_name']) ?></strong>
+                            <span><?= e((string) ($item['category'] ?? 'Reward')) ?> · <?= e(format_shards((int) $item['unit_price'])) ?> each</span>
+                        </div>
+                        <span class="order-qty">× <?= (int) $item['quantity'] ?></span>
+                        <strong><?= e(format_shards((int) $item['total_price'])) ?></strong>
+                    </div>
                 <?php endforeach; ?>
-            </ul>
+            </div>
         </article>
     <?php endforeach; ?>
     <?php if ($orders === []): ?><div class="glass-card center"><h2>No orders yet.</h2><p>Your purchases will appear here.</p></div><?php endif; ?>
