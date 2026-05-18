@@ -241,3 +241,113 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(34, 211, 238
   .order-item-row { grid-template-columns: 48px 1fr; }
   .order-item-row > strong, .order-qty { justify-self: start; }
 }
+
+.admin-hero { align-items: flex-end; }
+.admin-layout { display: grid; grid-template-columns: minmax(280px, 360px) minmax(0, 1fr); gap: 22px; align-items: start; }
+.admin-create { position: sticky; top: 105px; }
+.admin-items-list { display: grid; gap: 18px; }
+.admin-item-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  background: linear-gradient(135deg, rgba(18, 24, 48, .86), rgba(10, 14, 31, .74));
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+}
+.admin-item-card.is-disabled { opacity: .72; border-style: dashed; }
+.admin-item-form { display: grid; gap: 14px; }
+.admin-item-form label { margin: 0; }
+.admin-item-form textarea,
+.admin-item-form input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 13px;
+  color: var(--text);
+  background: rgba(3, 6, 18, .55);
+  outline: none;
+  resize: vertical;
+}
+.admin-item-form textarea:focus,
+.admin-item-form input:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(34, 211, 238, .12); }
+.admin-card-top { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 16px; align-items: start; }
+.admin-preview {
+  min-height: 150px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(164, 177, 255, .2);
+  border-radius: 12px;
+  background:
+    linear-gradient(45deg, rgba(255,255,255,.035) 25%, transparent 25%, transparent 75%, rgba(255,255,255,.035) 75%),
+    linear-gradient(45deg, rgba(255,255,255,.035) 25%, transparent 25%, transparent 75%, rgba(255,255,255,.035) 75%),
+    rgba(3, 6, 18, .36);
+  background-position: 0 0, 12px 12px;
+  background-size: 24px 24px;
+}
+.admin-preview img { width: 100%; height: 100%; max-height: 210px; object-fit: contain; object-position: center; image-rendering: pixelated; }
+.admin-preview span { color: var(--blue); font-size: 3.2rem; filter: drop-shadow(0 0 18px var(--blue)); }
+.admin-main-fields { display: grid; gap: 12px; }
+.admin-field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.admin-field-grid.wide { grid-template-columns: minmax(180px, 240px) minmax(0, 1fr); }
+.admin-item-meta { display: flex; flex-wrap: wrap; gap: 8px; }
+.admin-item-meta span,
+.toggle-row {
+  width: fit-content;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  color: var(--muted);
+  font-size: .82rem;
+  font-weight: 900;
+}
+.toggle-row { display: inline-flex; align-items: center; gap: 8px; margin: 0; }
+.toggle-row input { width: auto; }
+.commands-editor {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(164, 177, 255, .16);
+  border-radius: 12px;
+  background: rgba(255,255,255,.035);
+}
+.commands-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.command-box {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 42px 12px 12px;
+  border: 1px solid rgba(34, 211, 238, .2);
+  border-radius: 10px;
+  background: rgba(3, 6, 18, .42);
+  color: var(--blue);
+}
+.command-box textarea { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+.command-remove {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(251, 113, 133, .38);
+  border-radius: 50%;
+  color: var(--text);
+  background: rgba(251, 113, 133, .16);
+  cursor: pointer;
+  font-weight: 900;
+}
+.admin-actions { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+
+@media (max-width: 980px) {
+  .admin-layout { grid-template-columns: 1fr; }
+  .admin-create { position: static; }
+}
+
+@media (max-width: 640px) {
+  .admin-card-top,
+  .admin-field-grid,
+  .admin-field-grid.wide { grid-template-columns: 1fr; }
+  .admin-actions .btn { width: 100%; }
+}
