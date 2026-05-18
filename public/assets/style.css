@@ -182,21 +182,30 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(34, 211, 238
 .filters { margin-bottom: 22px; }
 .chip { padding: 10px 14px; border-radius: 8px; background: rgba(255,255,255,.07); color: var(--muted); border: 1px solid var(--border); font-weight: 800; }
 .chip.active, .chip:hover { color: var(--text); background: rgba(139, 92, 246, .24); }
-.item-card { overflow: hidden; display: grid; grid-template-rows: 190px 1fr; }
+.item-card {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 .item-image {
   width: 100%;
-  height: 190px;
-  display: grid;
-  place-items: center;
+  aspect-ratio: 1 / 1;
+  max-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
   background: rgba(255,255,255,.03);
+  padding: 14px;
 }
 
 .item-image img {
-  width: 100%;
-  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
-  object-position: center;
   image-rendering: pixelated;
 }
 .item-image span { font-size: 4rem; color: var(--blue); filter: drop-shadow(0 0 20px var(--blue)); }
