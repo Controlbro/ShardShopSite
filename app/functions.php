@@ -154,6 +154,37 @@ function audit_log(?string $uuid, ?string $username, string $action, ?string $me
     $stmt->execute([$uuid, $username, $action, $message, $ip]);
 }
 
+
+function can_edit_shop_items(?array $user = null): bool
+{
+    $user ??= current_user();
+    if ($user === null) {
+        return false;
+    }
+
+    return hash_equals('CBYT', (string) ($user['username'] ?? ''));
+}
+
+function require_shop_editor(): array
+{
+    $user = require_login();
+    if (!can_edit_shop_items($user)) {
+        http_response_code(403);
+        render_header('Forbidden');
+        ?>
+        <div class="glass-card center">
+            <h1>Shop editor locked</h1>
+            <p>Only the user named CBYT can edit shop items.</p>
+            <a class="btn" href="/shop.php">Back to Shop</a>
+        </div>
+        <?php
+        render_footer();
+        exit;
+    }
+
+    return $user;
+}
+
 function render_header(string $title): void
 {
     $user = current_user();
@@ -179,6 +210,9 @@ function render_header(string $title): void
                 <span class="username"><?= e($user['username']) ?></span>
                 <span class="balance-pill" data-balance>Loading...</span>
                 <a class="nav-link" href="/orders.php">Orders</a>
+                <?php if (can_edit_shop_items($user)): ?>
+                    <a class="nav-link" href="/admin-items.php">Edit Shop</a>
+                <?php endif; ?>
                 <a class="cart-link" href="/cart.php">Cart <span class="cart-badge" data-cart-count><?= $count ?></span></a>
                 <a class="nav-link" href="/logout.php">Logout</a>
             </div>

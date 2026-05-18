@@ -125,6 +125,103 @@
     });
   });
 
+
+
+  function updateCommandLabels(editor) {
+    editor.querySelectorAll('.command-box').forEach((box, index) => {
+      const textarea = box.querySelector('textarea');
+      const remove = box.querySelector('[data-remove-command]');
+      const text = textarea ? textarea.value : '';
+      box.childNodes[0].textContent = `Command ${index + 1}`;
+      if (textarea) textarea.value = text;
+      if (remove) remove.hidden = editor.querySelectorAll('.command-box').length <= 1;
+    });
+  }
+
+  function createCommandBox(editor) {
+    const label = document.createElement('label');
+    label.className = 'command-box';
+    label.append('Command');
+
+    const textarea = document.createElement('textarea');
+    textarea.name = 'commands[]';
+    textarea.rows = 2;
+    textarea.required = true;
+    textarea.placeholder = 'say Thanks {player}!';
+    label.appendChild(textarea);
+
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'command-remove';
+    remove.dataset.removeCommand = '';
+    remove.setAttribute('aria-label', 'Remove command');
+    remove.textContent = '×';
+    label.appendChild(remove);
+
+    editor.appendChild(label);
+    updateCommandLabels(editor);
+    textarea.focus();
+  }
+
+  document.querySelectorAll('[data-commands-editor]').forEach((editor) => {
+    updateCommandLabels(editor);
+    editor.addEventListener('click', (event) => {
+      const addButton = event.target.closest('[data-add-command]');
+      const removeButton = event.target.closest('[data-remove-command]');
+      if (addButton) {
+        createCommandBox(editor);
+      }
+      if (removeButton) {
+        const boxes = editor.querySelectorAll('.command-box');
+        if (boxes.length > 1) {
+          removeButton.closest('.command-box')?.remove();
+          updateCommandLabels(editor);
+        }
+      }
+    });
+  });
+
+  function refreshImagePreview(form) {
+    const input = form.querySelector('[data-image-input]');
+    const preview = form.querySelector('[data-image-preview]');
+    if (!input || !preview) return;
+    const url = input.value.trim();
+    preview.textContent = '';
+    if (!url) {
+      const fallback = document.createElement('span');
+      fallback.textContent = '✦';
+      preview.appendChild(fallback);
+      return;
+    }
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = 'Item image preview';
+    img.onerror = () => {
+      preview.textContent = '';
+      const fallback = document.createElement('span');
+      fallback.textContent = '?';
+      preview.appendChild(fallback);
+    };
+    preview.appendChild(img);
+  }
+
+  document.querySelectorAll('[data-admin-item-form]').forEach((form) => {
+    const input = form.querySelector('[data-image-input]');
+    if (input) {
+      input.addEventListener('input', () => refreshImagePreview(form));
+    }
+
+    form.querySelectorAll('[data-confirm-delete]').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        const itemName = form.querySelector('input[name="name"]')?.value || 'this item';
+        if (!window.confirm(`Delete ${itemName}? This cannot be undone.`)) {
+          event.preventDefault();
+        }
+      });
+    });
+  });
+
+
   async function refreshBalance() {
     const targets = document.querySelectorAll('[data-balance]');
     if (!targets.length) return;
