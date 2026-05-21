@@ -41,6 +41,7 @@ function run_install(): void
         commands JSON NOT NULL,
         enabled TINYINT(1) NOT NULL DEFAULT 1,
         sort_order INT NOT NULL DEFAULT 0,
+        one_time_purchase TINYINT(1) NOT NULL DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
@@ -85,6 +86,11 @@ function run_install(): void
         shards BIGINT NOT NULL DEFAULT 0,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $hasOneTimePurchase = (int) $pdo->query("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'webshop_items' AND COLUMN_NAME = 'one_time_purchase'")->fetchColumn() > 0;
+    if (!$hasOneTimePurchase) {
+        $pdo->exec("ALTER TABLE webshop_items ADD COLUMN one_time_purchase TINYINT(1) NOT NULL DEFAULT 0 AFTER sort_order");
+    }
 
     $count = (int) $pdo->query('SELECT COUNT(*) FROM webshop_items')->fetchColumn();
     if ($count === 0) {

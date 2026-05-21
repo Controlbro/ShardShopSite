@@ -60,6 +60,7 @@ function posted_item_payload(): array
         'commands' => $commands,
         'enabled' => isset($_POST['enabled']) ? 1 : 0,
         'sort_order' => $sortOrder,
+        'one_time_purchase' => isset($_POST['one_time_purchase']) ? 1 : 0,
     ];
 }
 
@@ -71,8 +72,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($action === 'create') {
             $payload = posted_item_payload();
-            $stmt = $pdo->prepare('INSERT INTO webshop_items (name, description, image_url, price, category, commands, enabled, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-            $stmt->execute([$payload['name'], $payload['description'], $payload['image_url'], $payload['price'], $payload['category'], json_encode($payload['commands'], JSON_UNESCAPED_SLASHES), $payload['enabled'], $payload['sort_order']]);
+            $stmt = $pdo->prepare('INSERT INTO webshop_items (name, description, image_url, price, category, commands, enabled, sort_order, one_time_purchase) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+            $stmt->execute([$payload['name'], $payload['description'], $payload['image_url'], $payload['price'], $payload['category'], json_encode($payload['commands'], JSON_UNESCAPED_SLASHES), $payload['enabled'], $payload['sort_order'], $payload['one_time_purchase']]);
             audit_log($user['uuid'], $user['username'], 'item_created', 'Created shop item: ' . $payload['name']);
             $notice = 'Created “' . $payload['name'] . '”.';
         } elseif ($action === 'save') {
@@ -80,8 +81,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('Missing item id.');
             }
             $payload = posted_item_payload();
-            $stmt = $pdo->prepare('UPDATE webshop_items SET name = ?, description = ?, image_url = ?, price = ?, category = ?, commands = ?, enabled = ?, sort_order = ? WHERE id = ?');
-            $stmt->execute([$payload['name'], $payload['description'], $payload['image_url'], $payload['price'], $payload['category'], json_encode($payload['commands'], JSON_UNESCAPED_SLASHES), $payload['enabled'], $payload['sort_order'], $itemId]);
+            $stmt = $pdo->prepare('UPDATE webshop_items SET name = ?, description = ?, image_url = ?, price = ?, category = ?, commands = ?, enabled = ?, sort_order = ?, one_time_purchase = ? WHERE id = ?');
+            $stmt->execute([$payload['name'], $payload['description'], $payload['image_url'], $payload['price'], $payload['category'], json_encode($payload['commands'], JSON_UNESCAPED_SLASHES), $payload['enabled'], $payload['sort_order'], $payload['one_time_purchase'], $itemId]);
             audit_log($user['uuid'], $user['username'], 'item_updated', 'Updated shop item #' . $itemId . ': ' . $payload['name']);
             $notice = 'Saved “' . $payload['name'] . '”.';
         } elseif ($action === 'clone') {
@@ -95,8 +96,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('Item not found.');
             }
             $cloneName = substr((string) $item['name'] . ' Copy', 0, 100);
-            $insert = $pdo->prepare('INSERT INTO webshop_items (name, description, image_url, price, category, commands, enabled, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-            $insert->execute([$cloneName, $item['description'], $item['image_url'], (int) $item['price'], $item['category'], $item['commands'], 0, (int) $item['sort_order'] + 1]);
+            $insert = $pdo->prepare('INSERT INTO webshop_items (name, description, image_url, price, category, commands, enabled, sort_order, one_time_purchase) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+            $insert->execute([$cloneName, $item['description'], $item['image_url'], (int) $item['price'], $item['category'], $item['commands'], 0, (int) $item['sort_order'] + 1, (int) ($item['one_time_purchase'] ?? 0)]);
             audit_log($user['uuid'], $user['username'], 'item_cloned', 'Cloned shop item #' . $itemId . ' as #' . $pdo->lastInsertId());
             $notice = 'Cloned “' . $item['name'] . '” as a disabled copy.';
         } elseif ($action === 'delete') {
@@ -151,6 +152,7 @@ render_header('Edit Shop Items');
             <label>Image URL <input type="text" name="image_url" placeholder="https://... or /assets/item.png" data-image-input></label>
             <label>Description <textarea name="description" rows="3" placeholder="Describe the reward"></textarea></label>
             <label class="toggle-row"><input type="checkbox" name="enabled" checked> Enabled in shop</label>
+            <label class="toggle-row"><input type="checkbox" name="one_time_purchase"> One-time purchase (limit 1 per player)</label>
             <div class="commands-editor" data-commands-editor>
                 <div class="commands-title"><strong>Commands</strong><button class="btn btn-secondary btn-small" type="button" data-add-command>+ Add command</button></div>
                 <label class="command-box">Command 1<textarea name="commands[]" rows="2" placeholder="give {player} diamond 16" required></textarea><button type="button" class="command-remove" data-remove-command aria-label="Remove command">×</button></label>
@@ -194,6 +196,7 @@ render_header('Edit Shop Items');
                     </div>
                     <label>Description <textarea name="description" rows="3"><?= e($item['description']) ?></textarea></label>
                     <label class="toggle-row"><input type="checkbox" name="enabled" <?= (int) $item['enabled'] === 1 ? 'checked' : '' ?>> Enabled in shop</label>
+                    <label class="toggle-row"><input type="checkbox" name="one_time_purchase" <?= (int) ($item['one_time_purchase'] ?? 0) === 1 ? 'checked' : '' ?>> One-time purchase (limit 1 per player)</label>
                     <div class="commands-editor" data-commands-editor>
                         <div class="commands-title"><strong>Commands</strong><button class="btn btn-secondary btn-small" type="button" data-add-command>+ Add command</button></div>
                         <?php foreach ($commands as $index => $command): ?>

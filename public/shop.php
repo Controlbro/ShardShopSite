@@ -18,7 +18,7 @@ if ($category !== '') {
 $items = $stmt->fetchAll();
 
 $recentStmt = db()->query("
-    SELECT oi.item_name, oi.quantity, oi.total_price, o.username, o.created_at, wi.image_url, wi.category
+    SELECT oi.item_name, o.username, o.created_at, wi.image_url, wi.category
     FROM webshop_order_items oi
     INNER JOIN webshop_orders o ON o.id = oi.order_id
     LEFT JOIN webshop_items wi ON wi.id = oi.item_id
@@ -56,6 +56,7 @@ render_header('Shop');
                 <div class="item-content">
                     <span class="category"><?= e($item['category']) ?></span>
                     <h2><?= e($item['name']) ?></h2>
+                    <?php if ((int) ($item['one_time_purchase'] ?? 0) === 1): ?><span class="one-time-chip">One-time purchase</span><?php endif; ?>
                     <p><?= e($item['description'] ?? 'A server reward delivered by command queue.') ?></p>
                     <div class="item-bottom">
                         <strong><?= e(format_shards((int) $item['price'])) ?></strong>
@@ -87,7 +88,7 @@ render_header('Shop');
                     </div>
                     <div>
                         <strong><?= e($purchase['item_name']) ?></strong>
-                        <p><?= e($purchase['username']) ?> bought <?= (int) $purchase['quantity'] ?> · <?= e(format_shards((int) $purchase['total_price'])) ?></p>
+                        <p><?= e($purchase['username']) ?> purchased this reward</p>
                     </div>
                 </article>
             <?php endforeach; ?>

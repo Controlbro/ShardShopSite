@@ -360,3 +360,8 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(34, 211, 238
   .admin-field-grid.wide { grid-template-columns: 1fr; }
   .admin-actions .btn { width: 100%; }
 }
+
+.one-time-chip { display: inline-block; width: fit-content; padding: 4px 8px; border-radius: 999px; border: 1px solid rgba(52,211,153,.45); color: var(--green); font-size: .72rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.cart-row h2 { font-size: clamp(1rem, 2.8vw, 1.35rem); }
+@media (max-width: 1080px) { .shop-layout { grid-template-columns: 1fr; } .recent-purchases { position: static; } }
+@media (max-width: 620px) { .container, .page-shell { padding-inline: 10px; } .item-content { padding: 14px; } .btn { padding: 10px 14px; } .cart-row { gap: 10px; padding: 12px; } .quantity-label { width: 76px; } .hero-card { padding: 24px; } }
