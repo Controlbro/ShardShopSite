@@ -30,3 +30,6 @@ define('BALANCE_CURRENCY_VALUE', 'Shards');
 define('SESSION_NAME', 'shardshop_session');
 define('REMEMBER_COOKIE_NAME', 'shardshop_remember');
 define('REMEMBER_COOKIE_LIFETIME', 60 * 60 * 24 * 30);
+
+// UUID allowed to access the admin item editor.
+define('SHOP_EDITOR_UUID', '00000000-0000-0000-0000-000000000000');

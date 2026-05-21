@@ -75,11 +75,31 @@ function set_cart(array $cart): void
     $_SESSION['cart'] = $cart;
 }
 
-function add_to_cart(int $itemId): void
+function add_to_cart(int $itemId, ?array $user = null): void
 {
+    $stmt = db()->prepare('SELECT id, name, one_time_purchase FROM webshop_items WHERE id = ? AND enabled = 1 LIMIT 1');
+    $stmt->execute([$itemId]);
+    $item = $stmt->fetch();
+    if (!$item) {
+        throw new RuntimeException('Item is not available.');
+    }
+
     $cart = cart();
     $key = (string) $itemId;
-    $cart[$key] = min(99, ((int) ($cart[$key] ?? 0)) + 1);
+    $isOneTimePurchase = (int) ($item['one_time_purchase'] ?? 0) === 1;
+    if ($isOneTimePurchase) {
+        if ($user !== null) {
+            $ownedStmt = db()->prepare('SELECT 1 FROM webshop_orders o INNER JOIN webshop_order_items oi ON oi.order_id = o.id WHERE o.uuid = ? AND oi.item_id = ? LIMIT 1');
+            $ownedStmt->execute([(string) $user['uuid'], $itemId]);
+            if ($ownedStmt->fetchColumn()) {
+                throw new RuntimeException('You already purchased this one-time item.');
+            }
+        }
+        $cart[$key] = 1;
+    } else {
+        $cart[$key] = min(99, ((int) ($cart[$key] ?? 0)) + 1);
+    }
+
     set_cart($cart);
 }
 
@@ -136,7 +156,9 @@ function get_cart_details(): array
     $total = 0;
     foreach ($rows as $row) {
         $id = (int) $row['id'];
-        $quantity = max(1, min(99, (int) ($cart[(string) $id] ?? 0)));
+        $isOneTimePurchase = (int) ($row['one_time_purchase'] ?? 0) === 1;
+        $maxQuantity = $isOneTimePurchase ? 1 : 99;
+        $quantity = max(1, min($maxQuantity, (int) ($cart[(string) $id] ?? 0)));
         $lineTotal = (int) $row['price'] * $quantity;
         $row['quantity'] = $quantity;
         $row['line_total'] = $lineTotal;
@@ -162,7 +184,12 @@ function can_edit_shop_items(?array $user = null): bool
         return false;
     }
 
-    return hash_equals('CBYT', (string) ($user['username'] ?? ''));
+    $editorUuid = strtolower(trim((string) SHOP_EDITOR_UUID));
+    if ($editorUuid === '' || $editorUuid === '00000000-0000-0000-0000-000000000000') {
+        return false;
+    }
+
+    return hash_equals($editorUuid, strtolower((string) ($user['uuid'] ?? '')));
 }
 
 function require_shop_editor(): array
@@ -174,7 +201,7 @@ function require_shop_editor(): array
         ?>
         <div class="glass-card center">
             <h1>Shop editor locked</h1>
-            <p>Only the user named CBYT can edit shop items.</p>
+            <p>Only the configured editor UUID can edit shop items.</p>
             <a class="btn" href="/shop.php">Back to Shop</a>
         </div>
         <?php
@@ -268,6 +295,16 @@ function checkout_current_cart(array $user): array
         $commandStmt = $pdo->prepare("INSERT INTO shop_pending_commands (order_id, uuid, username, command, signature, status) VALUES (?, ?, ?, ?, ?, 'pending')");
 
         foreach ($details['items'] as $item) {
+            if ((int) ($item['one_time_purchase'] ?? 0) === 1) {
+                if ((int) $item['quantity'] > 1) {
+                    throw new RuntimeException('One-time purchase items can only be bought once per order.');
+                }
+                $ownedStmt = $pdo->prepare('SELECT 1 FROM webshop_orders o INNER JOIN webshop_order_items oi ON oi.order_id = o.id WHERE o.uuid = ? AND oi.item_id = ? LIMIT 1');
+                $ownedStmt->execute([(string) $user['uuid'], (int) $item['id']]);
+                if ($ownedStmt->fetchColumn()) {
+                    throw new RuntimeException('You already purchased one of the selected one-time items.');
+                }
+            }
             $commandsJson = (string) $item['commands'];
             $commands = json_decode($commandsJson, true);
             if (!is_array($commands)) {
