@@ -5,12 +5,12 @@ declare(strict_types=1);
 // Database connection. Replace DB_PASS with your real MySQL password before deploying.
 define('DB_HOST', 'localhost');
 define('DB_PORT', 3306);
-define('DB_NAME', 'besteconomy');
-define('DB_USER', 'besteconomy');
-define('DB_PASS', 'Quentinm00!');
+define('DB_NAME', 'e');
+define('DB_USER', 'e');
+define('DB_PASS', 'e!');
 
 // Must match the Minecraft plugin webshop.api-key. Never expose this in public pages or logs.
-define('WEBSHOP_API_KEY', 'Y7mQ2vK9xLp4Nz8RjT6cWd1HsF3uBaXe');
+define('WEBSHOP_API_KEY', 'e');
 
 define('SITE_NAME', 'ShardShop');
 define('CURRENCY_NAME', 'Shards');
